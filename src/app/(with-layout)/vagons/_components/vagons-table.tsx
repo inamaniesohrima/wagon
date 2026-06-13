@@ -35,22 +35,22 @@ export function VagonsTable() {
       <div className="grid rounded-[10px] bg-white px-7.5 pb-4 pt-7.5 shadow-1 dark:bg-gray-dark dark:shadow-card">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-body-2xlg font-bold text-dark dark:text-white">
-            Vagons
+            لیست تگ‌های ثبت شده
           </h2>
           <button
             onClick={() => setOpen(true)}
             className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90"
           >
-            <span aria-hidden="true">+</span> Add Vagon
+            <span aria-hidden="true">+</span> اضافه کردن تگ
           </button>
         </div>
 
         <Table>
           <TableHeader>
             <TableRow className="border-none uppercase [&>th]:text-center">
-              <TableHead className="text-left!">Name / Plate</TableHead>
-              <TableHead>Tag Number</TableHead>
-              <TableHead>Created</TableHead>
+              <TableHead className="text-right!">پلاک</TableHead>
+              <TableHead>تگ</TableHead>
+              <TableHead>تاریخ</TableHead>
               <TableHead />
             </TableRow>
           </TableHeader>
@@ -62,7 +62,7 @@ export function VagonsTable() {
                   colSpan={4}
                   className="py-10 text-center text-sm text-gray-500"
                 >
-                  No vagons yet. Add one to get started.
+                  لوکوموتیوی ثبت نشده
                 </TableCell>
               </TableRow>
             )}
@@ -71,7 +71,7 @@ export function VagonsTable() {
                 key={vagon.id}
                 className="text-center text-base font-medium text-dark dark:text-white"
               >
-                <TableCell className="text-left!">{vagon.name}</TableCell>
+                <TableCell className="text-right!">{vagon.name}</TableCell>
                 <TableCell>{vagon.tagNumber}</TableCell>
                 <TableCell>
                   {new Date(vagon.createdAt!).toLocaleDateString()}
@@ -81,7 +81,7 @@ export function VagonsTable() {
                     onClick={() => handleDelete(vagon.id!)}
                     className="text-sm text-red-500 hover:underline"
                   >
-                    Delete
+                    حذف
                   </button>
                 </TableCell>
               </TableRow>

@@ -1,6 +1,6 @@
 "use client";
 
-import { Logo } from "@/components/logo";
+// import { Logo } from "@/components/logo";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -29,14 +29,14 @@ export function Sidebar() {
     NAV_DATA.some((section) => {
       return section.items.some((item) => {
         return item.items.some((subItem) => {
-          if (subItem.url === pathname) {
-            if (!expandedItems.includes(item.title)) {
-              toggleExpanded(item.title);
-            }
+          // if (subItem.url === pathname) {
+          //   if (!expandedItems.includes(item.title)) {
+          //     toggleExpanded(item.title);
+          //   }
 
-            // Break the loop
-            return true;
-          }
+          //   // Break the loop
+          //   return true;
+          // }
         });
       });
     });
@@ -70,7 +70,10 @@ export function Sidebar() {
               onClick={() => isMobile && toggleSidebar()}
               className="px-0 py-2.5 min-[850px]:py-0"
             >
-              <Logo />
+              {/* <Logo /> */}
+        <h1 className="text-heading-5 text-dark mb-0.5 font-bold dark:text-white">
+          دموی پروژه‌ی کرفت
+        </h1>
             </Link>
 
             {isMobile && (
@@ -127,7 +130,7 @@ export function Sidebar() {
                                 className="ml-9 mr-0 space-y-1.5 pb-3.75 pr-0 pt-2"
                                 role="menu"
                               >
-                                {item.items.map((subItem) => (
+                                {/* {item.items.map((subItem) => (
                                   <li key={subItem.title} role="none">
                                     <MenuItem
                                       as="link"
@@ -137,7 +140,7 @@ export function Sidebar() {
                                       <span>{subItem.title}</span>
                                     </MenuItem>
                                   </li>
-                                ))}
+                                ))} */}
                               </ul>
                             )}
                           </div>
@@ -146,8 +149,8 @@ export function Sidebar() {
                             const href =
                               "url" in item
                                 ? item.url + ""
-                                : "/" +
-                                  item.title.toLowerCase().split(" ").join("-");
+                                : "/" + ""
+                                  // item.title.toLowerCase().split(" ").join("-");
 
                             return (
                               <MenuItem

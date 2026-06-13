@@ -65,8 +65,7 @@ export function ProfileImageUploader({
   }
 
   return (
-    // <div className="relative z-30 mx-auto -mt-22 h-30 w-full max-w-30 rounded-full bg-white/20 p-1 backdrop-blur sm:h-44 sm:max-w-44 sm:p-2 ">
-    <div className="relative z-30 mx-auto -mt-10 h-44 w-44 rounded-full bg-white/20 backdrop-blur content-center">
+    <div className="relative z-30 mx-auto -mt-22 h-30 w-full max-w-30 rounded-full bg-white/20 p-1 backdrop-blur sm:h-44 sm:max-w-44 sm:p-2 ">
       <div className="flex relative items-center justify-center drop-shadow-2">
         {imageSrc ? (
           <Image

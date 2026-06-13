@@ -8,17 +8,17 @@ import { SocialAccounts } from "./_components/social-accounts";
 export default async function Page() {
 
   const profile = {
-    name: "Something",
+    name: "نام کاربری",
     email: "Something@Somewhere.com",
     profilePhoto: null,
     coverPhoto: "/images/cover/cover-01.png",
     bio:  "Bio not available",
-    role: "Role not set",
+    role: "رئیس جایگاه",
   };
 
   return (
     <div className="mx-auto w-full max-w-242.5">
-      <Breadcrumb pageName="Profile" />
+      <Breadcrumb pageName="تنظیمات کاربر" />
 
       <div className="overflow-hidden rounded-[10px] bg-white shadow-1 dark:bg-gray-dark dark:shadow-card">
         <div className="relative z-20 h-35 md:h-65">
@@ -62,7 +62,7 @@ export default async function Page() {
               {profile.name}
             </h3>
             <p className="font-medium">{profile.role}</p>
-            <div className="mx-auto mt-5 mb-5.5 grid max-w-92.5 grid-cols-3 rounded-[5px] border border-stroke py-2.25 shadow-1 dark:border-dark-3 dark:bg-dark-2 dark:shadow-card">
+            {/* <div className="mx-auto mt-5 mb-5.5 grid max-w-92.5 grid-cols-3 rounded-[5px] border border-stroke py-2.25 shadow-1 dark:border-dark-3 dark:bg-dark-2 dark:shadow-card">
               <div className="flex flex-col items-center justify-center gap-1 border-r border-stroke px-4 xsm:flex-row dark:border-dark-3">
                 <span className="font-medium text-dark dark:text-white">
                   259
@@ -81,16 +81,16 @@ export default async function Page() {
                 </span>
                 <span className="text-body-sm-sm">Following</span>
               </div>
-            </div>
+            </div> */}
 
-            <div className="mx-auto max-w-180">
+            {/* <div className="mx-auto max-w-180">
               <h4 className="font-medium text-dark dark:text-white">
                 About Me
               </h4>
               <p className="mt-4">{profile.bio}</p>
             </div>
 
-            <SocialAccounts />
+            <SocialAccounts /> */}
           </div>
         </div>
       </div>

@@ -20,28 +20,34 @@ type SiteRow = Vagon & {
   matched: Vagon | null;
 };
 
-type PropsType = {
-  onFuelRecordCreated?: (record: FuelRecord) => void;
-};
-
-export function SiteVagonsTable({ onFuelRecordCreated }: PropsType) {
-  const [rows, setRows] = useState<SiteRow[]>(() => getSiteRows());
+export function SiteVagonsTable() {
+  const [rows, setRows] = useState<SiteRow[]>([]);
   const [fuelTarget, setFuelTarget] = useState<Vagon | null>(null);
+  const [addTarget, setAddTarget] = useState<Vagon | null>(null);
+
+  useEffect(() => {
+    hydrate();
+  }, []);
 
   function hydrate() {
-    setRows(getSiteRows());
+    const stored = vagonService.getAll();
+    const enriched = mockSiteVagons.map((sv: Vagon) => ({
+      ...sv,
+      matched: stored.find((v) => v.tagNumber === sv.tagNumber) ?? null,
+    }));
+    setRows(enriched);
   }
 
   function handleAddToVagons(siteVagon: Vagon) {
-    vagonService.create({
-      name: siteVagon.name,
-      tagNumber: siteVagon.tagNumber,
-    });
+    setAddTarget(siteVagon);
+  }
+
+  function handleVagonCreated() {
+    setAddTarget(null);
     hydrate(); // re-match all rows against updated localStorage
   }
 
-  function handleFuelRecordCreated(record: FuelRecord) {
-    onFuelRecordCreated?.(record);
+  function handleFuelRecordCreated() {
     setFuelTarget(null);
   }
 
@@ -51,26 +57,25 @@ export function SiteVagonsTable({ onFuelRecordCreated }: PropsType) {
         <div className="mb-4 flex items-center justify-between">
           <div>
             <h2 className="text-body-2xlg font-bold text-dark dark:text-white">
-              Vagons on Site
+              لوکوموتیوهای حاضر در جایگاه
             </h2>
             <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">
-              Live antenna feed · {rows.length} detected
+              {rows.length} تگ شناسایی شد
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <Badge color="green" label="Known" />
-            <Badge color="orange" label="Unknown" />
+            <Badge color="green" label="شناخته شده" />
+            <Badge color="orange" label="ناشناس" />
           </div>
         </div>
 
         <Table>
           <TableHeader>
             <TableRow className="border-none uppercase [&>th]:text-center">
-              <TableHead className="text-left!">Tag Number</TableHead>
-              <TableHead className="text-left!">Antenna Name</TableHead>
-              <TableHead className="text-left!">Stored Name</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right!">Action</TableHead>
+              <TableHead className="text-right!">تگ</TableHead>
+              <TableHead className="text-right!">پلاک</TableHead>
+              <TableHead>وضعیت</TableHead>
+              <TableHead className="text-right!"></TableHead>
             </TableRow>
           </TableHeader>
 
@@ -94,12 +99,12 @@ export function SiteVagonsTable({ onFuelRecordCreated }: PropsType) {
                   {row.matched ? (
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400">
                       <span className="size-1.5 rounded-full bg-green-500" />
-                      Known
+                      شناخته شده
                     </span>
                   ) : (
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-100 px-2.5 py-0.5 text-xs font-medium text-orange-700 dark:bg-orange-900/30 dark:text-orange-400">
                       <span className="size-1.5 rounded-full bg-orange-500" />
-                      Unknown
+                      ناشناس
                     </span>
                   )}
                 </TableCell>
@@ -110,14 +115,14 @@ export function SiteVagonsTable({ onFuelRecordCreated }: PropsType) {
                       onClick={() => setFuelTarget(row.matched!)}
                       className="rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-white hover:bg-primary/90"
                     >
-                      Submit Fuel Record
+                      ثبت رکورد
                     </button>
                   ) : (
                     <button
                       onClick={() => handleAddToVagons(row)}
                       className="rounded-lg border border-stroke px-3 py-1.5 text-xs font-medium text-dark hover:bg-gray-1 dark:border-dark-3 dark:text-white dark:hover:bg-dark-2"
                     >
-                      Add to Vagons
+                      اضافه کردن لوکوموتیو
                     </button>
                   )}
                 </TableCell>
@@ -134,16 +139,111 @@ export function SiteVagonsTable({ onFuelRecordCreated }: PropsType) {
           onCreated={handleFuelRecordCreated}
         />
       )}
+
+      {addTarget && (
+        <AddVagonModal
+          siteVagon={addTarget}
+          onClose={() => setAddTarget(null)}
+          onCreated={handleVagonCreated}
+        />
+      )}
     </>
   );
 }
 
-function getSiteRows(): SiteRow[] {
-  const stored = vagonService.getAll();
-  return mockSiteVagons.map((sv) => ({
-    ...sv,
-    matched: stored.find((v) => v.tagNumber === sv.tagNumber) ?? null,
-  }));
+// ─── Add Vagon Modal ──────────────────────────────────────────────────────────
+
+function AddVagonModal({
+  siteVagon,
+  onClose,
+  onCreated,
+}: {
+  siteVagon: Vagon;
+  onClose: () => void;
+  onCreated: () => void;
+}) {
+  const [name, setName] = useState(siteVagon.name);
+  const [error, setError] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    inputRef.current?.focus();
+    inputRef.current?.select();
+  }, []);
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!name!.trim()) {
+      setError("Required");
+      return;
+    }
+    vagonService.create({ name: name!.trim(), tagNumber: siteVagon.tagNumber });
+    onCreated();
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl dark:bg-gray-dark">
+        <div className="mb-5 flex items-center justify-between">
+          <h3 className="text-lg font-bold text-dark dark:text-white">
+            اضافه کردن تگ
+          </h3>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+            aria-label="Close"
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Tag number — read-only context */}
+        <div className="mb-4 flex items-center gap-2 rounded-lg bg-gray-1 px-3 py-2 dark:bg-dark-2">
+          <span className="text-xs text-gray-500 dark:text-gray-400">
+            تگ
+          </span>
+          <span className="ml-auto font-mono text-sm font-semibold text-dark dark:text-white">
+            {siteVagon.tagNumber}
+          </span>
+        </div>
+
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <Field label="پلاک" error={error}>
+            <input
+              ref={inputRef}
+              type="text"
+              value={name!}
+              onChange={(e) => {
+                setName(e.target.value);
+                setError("");
+              }}
+              placeholder="e.g. Vagon Alpha"
+              className={inputCls(!!error)}
+            />
+          </Field>
+
+          <div className="mt-2 flex justify-end gap-3">
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-lg border border-stroke px-4 py-2 text-sm font-medium text-dark hover:bg-gray-1 dark:border-dark-3 dark:text-white dark:hover:bg-dark-2"
+            >
+              لغو
+            </button>
+            <button
+              type="submit"
+              className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90"
+            >
+              اضافه
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
 }
 
 // ─── Fuel Record Modal ────────────────────────────────────────────────────────

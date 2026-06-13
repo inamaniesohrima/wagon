@@ -40,9 +40,10 @@ export function HomeDashboard() {
 
   return (
     <div className="mt-4 grid grid-cols-12 gap-4 md:mt-6 md:gap-6 2xl:mt-9 2xl:gap-7.5">
-      <div className="col-span-12 grid gap-4 sm:grid-cols-2 xl:col-span-5 2xl:gap-7.5">
+      {/* <div className="col-span-12 grid gap-4 sm:grid-cols-2 xl:col-span-5 2xl:gap-7.5"> */}
+      <div className="col-span-12 flex flex-col gap-6 xl:col-span-3 2xl:gap-7.5">
         <OverviewCard
-          label="Total Fuel Liters"
+          label="مجموع کل سوخت‌گیری انجام شده"
           data={{
             value: `${standardFormat(totalLiters)} L`,
             growthRate: 0,
@@ -52,7 +53,7 @@ export function HomeDashboard() {
         />
 
         <OverviewCard
-          label="Fuel Records"
+          label="تعداد کل سوخت‌گیری‌ها"
           data={{
             value: records.length,
             growthRate: 0,
@@ -62,13 +63,14 @@ export function HomeDashboard() {
         />
       </div>
 
-      <div className="col-span-12 grid gap-2 rounded-[10px] bg-white px-7.5 pb-6 pt-7.5 shadow-1 dark:bg-gray-dark dark:shadow-card xl:col-span-7">
+      {/* <div className="col-span-12 grid gap-2 rounded-[10px] bg-white px-7.5 pb-6 pt-7.5 shadow-1 dark:bg-gray-dark dark:shadow-card xl:col-span-7"> */}
+       <div className="col-span-12 grid gap-2 rounded-[10px] bg-white px-7.5 pb-6 pt-7.5 shadow-1 dark:bg-gray-dark dark:shadow-card xl:col-span-9">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <h2 className="text-body-2xlg font-bold text-dark dark:text-white">
-            Fuel Overview
+            آمار سوخت‌رسانی
           </h2>
           <span className="text-sm font-medium text-dark-6">
-            Daily recorded liters
+            سوخت‌رسانی روزانه به لیتر
           </span>
         </div>
 
@@ -81,21 +83,10 @@ export function HomeDashboard() {
             },
           ]}
         />
-
-        <dl className="grid text-center">
-          <div className="flex flex-col-reverse gap-1">
-            <dt className="text-xl font-bold text-dark dark:text-white">
-              {standardFormat(totalLiters)} L
-            </dt>
-            <dd className="font-medium dark:text-dark-6">
-              Total Recorded Fuel
-            </dd>
-          </div>
-        </dl>
       </div>
 
       <div className="col-span-12">
-        <SiteVagonsTable onFuelRecordCreated={emitFuelRecordsChange} />
+        <SiteVagonsTable />
       </div>
     </div>
   );
@@ -119,6 +110,6 @@ function getFuelRecordsSnapshot() {
   return JSON.stringify(fuelRecordService.getAll());
 }
 
-function emitFuelRecordsChange() {
-  window.dispatchEvent(new Event("fuel-records-change"));
-}
+// function emitFuelRecordsChange() {
+//   window.dispatchEvent(new Event("fuel-records-change"));
+// }

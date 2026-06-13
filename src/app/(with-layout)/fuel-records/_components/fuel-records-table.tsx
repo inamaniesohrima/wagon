@@ -56,14 +56,14 @@ export function FuelRecordsTable() {
         <Table>
           <TableHeader>
             <TableRow className="border-none uppercase [&>th]:text-center">
-              <TableHead className="text-left!">Vagon</TableHead>
+              <TableHead className="text-left!">لوکوموتیو</TableHead>
               <TableHead>شماره دیسپنسر</TableHead>
               <TableHead>کد پرسنلی</TableHead>
               <TableHead>تاریخ</TableHead>
               <TableHead>مقدار سوخت</TableHead>
               <TableHead>مقدار ورودی</TableHead>
               <TableHead>مدت زمان</TableHead>
-              <TableHead />
+              {/* <TableHead /> */}
             </TableRow>
           </TableHeader>
 
@@ -74,7 +74,7 @@ export function FuelRecordsTable() {
                   colSpan={8}
                   className="py-10 text-center text-sm text-gray-500"
                 >
-                  No fuel records yet. Add one to get started.
+                  رکوردی ثبت نشده
                 </TableCell>
               </TableRow>
             )}
@@ -92,14 +92,14 @@ export function FuelRecordsTable() {
                 <TableCell>{record.liters} L</TableCell>
                 <TableCell>{record.preset}</TableCell>
                 <TableCell>{record.duration} min</TableCell>
-                <TableCell>
+                {/* <TableCell>
                   <button
                     onClick={() => handleDelete(record.id)}
                     className="text-sm text-red-500 hover:underline"
                   >
                     حذف
                   </button>
-                </TableCell>
+                </TableCell> */}
               </TableRow>
             ))}
           </TableBody>
@@ -181,7 +181,7 @@ function AddFuelRecordModal({
       <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl dark:bg-gray-dark">
         <div className="mb-5 flex items-center justify-between">
           <h3 className="text-lg font-bold text-dark dark:text-white">
-            Add Fuel Record
+            ثبت سوخت‌گیری
           </h3>
           <button
             onClick={onClose}
@@ -194,7 +194,7 @@ function AddFuelRecordModal({
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           {/* Vagon */}
-          <Field label="Vagon" error={errors.vagonId}>
+          <Field label="لوکوموتیو" error={errors.vagonId}>
             <select
               ref={firstInputRef}
               value={form.vagonId}
@@ -212,7 +212,7 @@ function AddFuelRecordModal({
 
           {/* Two-column row */}
           <div className="grid grid-cols-2 gap-4">
-            <Field label="Dis Number" error={errors.disNumber}>
+            <Field label="دیسپنسر" error={errors.disNumber}>
               <input
                 type="text"
                 value={form.disNumber}
@@ -222,7 +222,7 @@ function AddFuelRecordModal({
               />
             </Field>
 
-            <Field label="Personal Number" error={errors.personalNumber}>
+            <Field label="شماره پرسنل" error={errors.personalNumber}>
               <input
                 type="text"
                 value={form.personalNumber}
@@ -234,7 +234,7 @@ function AddFuelRecordModal({
           </div>
 
           {/* Date */}
-          <Field label="Date" error={errors.date}>
+          <Field label="تاریخ" error={errors.date}>
             <input
               type="date"
               value={form.date}
@@ -245,7 +245,7 @@ function AddFuelRecordModal({
 
           {/* Three-column row */}
           <div className="grid grid-cols-3 gap-4">
-            <Field label="Liters" error={errors.liters}>
+            <Field label="مقدار به لیتر" error={errors.liters}>
               <input
                 type="number"
                 min={0}
@@ -257,7 +257,7 @@ function AddFuelRecordModal({
               />
             </Field>
 
-            <Field label="Preset" error={errors.preset}>
+            <Field label="پریست" error={errors.preset}>
               <input
                 type="number"
                 min={0}
@@ -269,7 +269,7 @@ function AddFuelRecordModal({
               />
             </Field>
 
-            <Field label="Duration (min)" error={errors.duration}>
+            <Field label="مدت سوخت‌گیری (دقیقه)" error={errors.duration}>
               <input
                 type="number"
                 min={0}
@@ -287,13 +287,13 @@ function AddFuelRecordModal({
               onClick={onClose}
               className="rounded-lg border border-stroke px-4 py-2 text-sm font-medium text-dark hover:bg-gray-1 dark:border-dark-3 dark:text-white dark:hover:bg-dark-2"
             >
-              Cancel
+              لغو
             </button>
             <button
               type="submit"
               className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90"
             >
-              Save
+              ذخیره
             </button>
           </div>
         </form>

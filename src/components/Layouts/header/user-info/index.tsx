@@ -56,7 +56,7 @@ export function UserInfo() {
   //   img: session?.data?.user?.image as string,
   // };
   const user = {
-    name: "Something",
+    name: "رئیس جایگاه",
     email: "Something@Somewhere.com",
     img: ""
   }
