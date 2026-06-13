@@ -9,96 +9,117 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { fuelRecordService } from "@/services/fuel-record.service";
 import { vagonService } from "@/services/vagon.service";
-import type { FuelRecord, CreateFuelRecordInput } from "@/types/fuel-record";
+import { fuelRecordService } from "@/services/fuel-record.service";
+import { mockSiteVagons } from "@/services/mockVagonsSite";
 import type { Vagon } from "@/types/vagon";
+import type { FuelRecord, CreateFuelRecordInput } from "@/types/fuel-record";
 
-export function FuelRecordsTable() {
-  const [records, setRecords] = useState<FuelRecord[]>([]);
-  const [vagons, setVagons] = useState<Vagon[]>([]);
-  const [open, setOpen] = useState(false);
+// Each row is a site vagon enriched with its localStorage match (if any)
+type SiteRow = Vagon & {
+  matched: Vagon | null;
+};
 
-  useEffect(() => {
-    setRecords(fuelRecordService.getAll());
-    setVagons(vagonService.getAll());
-  }, []);
+type PropsType = {
+  onFuelRecordCreated?: (record: FuelRecord) => void;
+};
 
-  function handleCreated(record: FuelRecord) {
-    setRecords((prev) => [...prev, record]);
-    setOpen(false);
+export function SiteVagonsTable({ onFuelRecordCreated }: PropsType) {
+  const [rows, setRows] = useState<SiteRow[]>(() => getSiteRows());
+  const [fuelTarget, setFuelTarget] = useState<Vagon | null>(null);
+
+  function hydrate() {
+    setRows(getSiteRows());
   }
 
-  function handleDelete(id: string) {
-    fuelRecordService.delete(id);
-    setRecords((prev) => prev.filter((r) => r.id !== id));
+  function handleAddToVagons(siteVagon: Vagon) {
+    vagonService.create({
+      name: siteVagon.name,
+      tagNumber: siteVagon.tagNumber,
+    });
+    hydrate(); // re-match all rows against updated localStorage
   }
 
-  function vagonName(id: string) {
-    return vagons.find((v) => v.id === id)?.name ?? id;
+  function handleFuelRecordCreated(record: FuelRecord) {
+    onFuelRecordCreated?.(record);
+    setFuelTarget(null);
   }
 
   return (
     <>
       <div className="grid rounded-[10px] bg-white px-7.5 pb-4 pt-7.5 shadow-1 dark:bg-gray-dark dark:shadow-card">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-body-2xlg font-bold text-dark dark:text-white">
-            رکورد‌های سوخت‌رسانی
-          </h2>
-          <button
-            onClick={() => setOpen(true)}
-            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90"
-          >
-            <span aria-hidden="true">+</span>  رکورد جدید
-          </button>
+          <div>
+            <h2 className="text-body-2xlg font-bold text-dark dark:text-white">
+              Vagons on Site
+            </h2>
+            <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">
+              Live antenna feed · {rows.length} detected
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Badge color="green" label="Known" />
+            <Badge color="orange" label="Unknown" />
+          </div>
         </div>
 
         <Table>
           <TableHeader>
             <TableRow className="border-none uppercase [&>th]:text-center">
-              <TableHead className="text-left!">Vagon</TableHead>
-              <TableHead>شماره دیسپنسر</TableHead>
-              <TableHead>کد پرسنلی</TableHead>
-              <TableHead>تاریخ</TableHead>
-              <TableHead>مقدار سوخت</TableHead>
-              <TableHead>مقدار ورودی</TableHead>
-              <TableHead>مدت زمان</TableHead>
-              <TableHead />
+              <TableHead className="text-left!">Tag Number</TableHead>
+              <TableHead className="text-left!">Antenna Name</TableHead>
+              <TableHead className="text-left!">Stored Name</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right!">Action</TableHead>
             </TableRow>
           </TableHeader>
 
           <TableBody>
-            {records.length === 0 && (
-              <TableRow>
-                <TableCell
-                  colSpan={8}
-                  className="py-10 text-center text-sm text-gray-500"
-                >
-                  No fuel records yet. Add one to get started.
-                </TableCell>
-              </TableRow>
-            )}
-            {records.map((record) => (
+            {rows.map((row) => (
               <TableRow
-                key={record.id}
-                className="text-center text-base font-medium text-dark dark:text-white"
+                key={row.tagNumber}
+                className="text-base font-medium text-dark dark:text-white"
               >
-                <TableCell className="text-left!">
-                  {vagonName(record.vagonId)}
+                <TableCell className="font-mono text-sm">
+                  {row.tagNumber}
                 </TableCell>
-                <TableCell>{record.disNumber}</TableCell>
-                <TableCell>{record.personalNumber}</TableCell>
-                <TableCell>{record.date}</TableCell>
-                <TableCell>{record.liters} L</TableCell>
-                <TableCell>{record.preset}</TableCell>
-                <TableCell>{record.duration} min</TableCell>
-                <TableCell>
-                  <button
-                    onClick={() => handleDelete(record.id)}
-                    className="text-sm text-red-500 hover:underline"
-                  >
-                    حذف
-                  </button>
+
+                <TableCell>{row.name}</TableCell>
+
+                <TableCell className="text-gray-500 dark:text-gray-400">
+                  {row.matched?.name ?? "—"}
+                </TableCell>
+
+                <TableCell className="text-center">
+                  {row.matched ? (
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                      <span className="size-1.5 rounded-full bg-green-500" />
+                      Known
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-100 px-2.5 py-0.5 text-xs font-medium text-orange-700 dark:bg-orange-900/30 dark:text-orange-400">
+                      <span className="size-1.5 rounded-full bg-orange-500" />
+                      Unknown
+                    </span>
+                  )}
+                </TableCell>
+
+                <TableCell className="text-right">
+                  {row.matched ? (
+                    <button
+                      onClick={() => setFuelTarget(row.matched!)}
+                      className="rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-white hover:bg-primary/90"
+                    >
+                      Submit Fuel Record
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => handleAddToVagons(row)}
+                      className="rounded-lg border border-stroke px-3 py-1.5 text-xs font-medium text-dark hover:bg-gray-1 dark:border-dark-3 dark:text-white dark:hover:bg-dark-2"
+                    >
+                      Add to Vagons
+                    </button>
+                  )}
                 </TableCell>
               </TableRow>
             ))}
@@ -106,57 +127,66 @@ export function FuelRecordsTable() {
         </Table>
       </div>
 
-      {open && (
+      {fuelTarget && (
         <AddFuelRecordModal
-          vagons={vagons}
-          onClose={() => setOpen(false)}
-          onCreated={handleCreated}
+          vagon={fuelTarget}
+          onClose={() => setFuelTarget(null)}
+          onCreated={handleFuelRecordCreated}
         />
       )}
     </>
   );
 }
 
-// ─── Modal ────────────────────────────────────────────────────────────────────
+function getSiteRows(): SiteRow[] {
+  const stored = vagonService.getAll();
+  return mockSiteVagons.map((sv) => ({
+    ...sv,
+    matched: stored.find((v) => v.tagNumber === sv.tagNumber) ?? null,
+  }));
+}
 
-const EMPTY_FORM: CreateFuelRecordInput = {
-  vagonId: "",
+// ─── Fuel Record Modal ────────────────────────────────────────────────────────
+
+const emptyForm = (vagonId: string): CreateFuelRecordInput => ({
+  vagonId,
   disNumber: "",
   personalNumber: "",
   date: new Date().toISOString().slice(0, 10),
   liters: 0,
   preset: 0,
   duration: 0,
-};
+});
 
 function AddFuelRecordModal({
-  vagons,
+  vagon,
   onClose,
   onCreated,
 }: {
-  vagons: Vagon[];
+  vagon: Vagon;
   onClose: () => void;
   onCreated: (record: FuelRecord) => void;
 }) {
-  const [form, setForm] = useState<CreateFuelRecordInput>({
-    ...EMPTY_FORM,
-    vagonId: vagons[0]?.id ?? "",
-  });
-  const [errors, setErrors] = useState<Partial<Record<keyof CreateFuelRecordInput, string>>>({});
-  const firstInputRef = useRef<HTMLSelectElement>(null);
+  const [form, setForm] = useState<CreateFuelRecordInput>(emptyForm(vagon.id!));
+  const [errors, setErrors] = useState<
+    Partial<Record<keyof CreateFuelRecordInput, string>>
+  >({});
+  const firstRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    firstInputRef.current?.focus();
+    firstRef.current?.focus();
   }, []);
 
-  function set<K extends keyof CreateFuelRecordInput>(key: K, value: CreateFuelRecordInput[K]) {
+  function set<K extends keyof CreateFuelRecordInput>(
+    key: K,
+    value: CreateFuelRecordInput[K],
+  ) {
     setForm((prev) => ({ ...prev, [key]: value }));
     setErrors((prev) => ({ ...prev, [key]: undefined }));
   }
 
   function validate(): boolean {
     const e: Partial<Record<keyof CreateFuelRecordInput, string>> = {};
-    if (!form.vagonId) e.vagonId = "Required";
     if (!form.disNumber.trim()) e.disNumber = "Required";
     if (!form.personalNumber.trim()) e.personalNumber = "Required";
     if (!form.date) e.date = "Required";
@@ -179,9 +209,9 @@ function AddFuelRecordModal({
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl dark:bg-gray-dark">
-        <div className="mb-5 flex items-center justify-between">
+        <div className="mb-1 flex items-center justify-between">
           <h3 className="text-lg font-bold text-dark dark:text-white">
-            Add Fuel Record
+            Submit Fuel Record
           </h3>
           <button
             onClick={onClose}
@@ -192,28 +222,22 @@ function AddFuelRecordModal({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          {/* Vagon */}
-          <Field label="Vagon" error={errors.vagonId}>
-            <select
-              ref={firstInputRef}
-              value={form.vagonId}
-              onChange={(e) => set("vagonId", e.target.value)}
-              className={inputCls(!!errors.vagonId)}
-            >
-              <option value="">Select a vagon…</option>
-              {vagons.map((v) => (
-                <option key={v.id} value={v.id!}>
-                  {v.name!} — {v.tagNumber!}
-                </option>
-              ))}
-            </select>
-          </Field>
+        {/* Vagon badge — locked, not editable */}
+        <div className="mb-5 flex items-center gap-2 rounded-lg bg-gray-1 px-3 py-2 dark:bg-dark-2">
+          <span className="text-xs text-gray-500 dark:text-gray-400">Vagon</span>
+          <span className="text-sm font-semibold text-dark dark:text-white">
+            {vagon.name}
+          </span>
+          <span className="ml-auto font-mono text-xs text-gray-400">
+            {vagon.tagNumber}
+          </span>
+        </div>
 
-          {/* Two-column row */}
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="grid grid-cols-2 gap-4">
             <Field label="Dis Number" error={errors.disNumber}>
               <input
+                ref={firstRef}
                 type="text"
                 value={form.disNumber}
                 onChange={(e) => set("disNumber", e.target.value)}
@@ -233,7 +257,6 @@ function AddFuelRecordModal({
             </Field>
           </div>
 
-          {/* Date */}
           <Field label="Date" error={errors.date}>
             <input
               type="date"
@@ -243,7 +266,6 @@ function AddFuelRecordModal({
             />
           </Field>
 
-          {/* Three-column row */}
           <div className="grid grid-cols-3 gap-4">
             <Field label="Liters" error={errors.liters}>
               <input
@@ -274,7 +296,9 @@ function AddFuelRecordModal({
                 type="number"
                 min={0}
                 value={form.duration || ""}
-                onChange={(e) => set("duration", parseInt(e.target.value) || 0)}
+                onChange={(e) =>
+                  set("duration", parseInt(e.target.value) || 0)
+                }
                 placeholder="0"
                 className={inputCls(!!errors.duration)}
               />
@@ -293,7 +317,7 @@ function AddFuelRecordModal({
               type="submit"
               className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90"
             >
-              Save
+              Submit
             </button>
           </div>
         </form>
@@ -303,6 +327,27 @@ function AddFuelRecordModal({
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function Badge({ color, label }: { color: "green" | "orange"; label: string }) {
+  const styles = {
+    green:
+      "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
+    orange:
+      "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400",
+  };
+  const dotStyles = {
+    green: "bg-green-500",
+    orange: "bg-orange-500",
+  };
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ${styles[color]}`}
+    >
+      <span className={`size-1.5 rounded-full ${dotStyles[color]}`} />
+      {label}
+    </span>
+  );
+}
 
 function Field({
   label,

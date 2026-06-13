@@ -74,11 +74,11 @@ export function VagonsTable() {
                 <TableCell className="text-left!">{vagon.name}</TableCell>
                 <TableCell>{vagon.tagNumber}</TableCell>
                 <TableCell>
-                  {new Date(vagon.createdAt).toLocaleDateString()}
+                  {new Date(vagon.createdAt!).toLocaleDateString()}
                 </TableCell>
                 <TableCell>
                   <button
-                    onClick={() => handleDelete(vagon.id)}
+                    onClick={() => handleDelete(vagon.id!)}
                     className="text-sm text-red-500 hover:underline"
                   >
                     Delete
@@ -119,7 +119,7 @@ function AddVagonModal({
 
   function validate(): boolean {
     const e: Partial<CreateVagonInput> = {};
-    if (!form.name.trim()) e.name = "Required";
+    if (!form.name!.trim()) e.name = "Required";
     if (!form.tagNumber.trim()) e.tagNumber = "Required";
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -154,12 +154,12 @@ function AddVagonModal({
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <Field
             label="Name / Plate Number"
-            error={errors.name}
+            error={errors.name!}
           >
             <input
               ref={firstInputRef}
               type="text"
-              value={form.name}
+              value={form.name!}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               placeholder="e.g. 34 ABC 001"
               className={inputCls(!!errors.name)}

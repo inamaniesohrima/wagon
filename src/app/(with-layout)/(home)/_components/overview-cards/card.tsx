@@ -10,16 +10,23 @@ type PropsType = {
   };
   className?: string;
   Icon: (props: SVGProps<SVGSVGElement>) => JSX.Element;
+  showGrowth?: boolean;
 };
 
-export function OverviewCard({ label, data, Icon, className }: PropsType) {
+export function OverviewCard({
+  label,
+  data,
+  Icon,
+  className,
+  showGrowth = true,
+}: PropsType) {
   const isDecreasing = data.growthRate < 0;
 
   return (
     // <div className="rounded-[10px] bg-white p-6 shadow-1 dark:bg-gray-dark">
     <div
       className={cn(
-        "rounded-[10px] bg-white px-7.5 py-7.5 shadow-1 dark:bg-gray-dark dark:shadow-card, w-48",
+        "rounded-[10px] bg-white px-7.5 py-7.5 shadow-1 dark:bg-gray-dark dark:shadow-card",
         className,
       )}
     >
@@ -34,26 +41,28 @@ export function OverviewCard({ label, data, Icon, className }: PropsType) {
           <dd className="text-sm font-medium text-dark-6">{label}</dd>
         </dl>
 
-        <dl
-          className={cn(
-            "text-sm font-medium",
-            isDecreasing ? "text-red" : "text-green",
-          )}
-        >
-          <dt className="flex items-center gap-1.5">
-            {data.growthRate}%
-            {isDecreasing ? (
-              <ArrowDownIcon aria-hidden />
-            ) : (
-              <ArrowUpIcon aria-hidden />
+        {showGrowth && (
+          <dl
+            className={cn(
+              "text-sm font-medium",
+              isDecreasing ? "text-red" : "text-green",
             )}
-          </dt>
+          >
+            <dt className="flex items-center gap-1.5">
+              {data.growthRate}%
+              {isDecreasing ? (
+                <ArrowDownIcon aria-hidden />
+              ) : (
+                <ArrowUpIcon aria-hidden />
+              )}
+            </dt>
 
-          <dd className="sr-only">
-            {label} {isDecreasing ? "Decreased" : "Increased"} by{" "}
-            {data.growthRate}%
-          </dd>
-        </dl>
+            <dd className="sr-only">
+              {label} {isDecreasing ? "Decreased" : "Increased"} by{" "}
+              {data.growthRate}%
+            </dd>
+          </dl>
+        )}
       </div>
     </div>
   );

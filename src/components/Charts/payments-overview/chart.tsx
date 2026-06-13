@@ -5,24 +5,47 @@ import type { ApexOptions } from "apexcharts";
 import dynamic from "next/dynamic";
 
 type PropsType = {
-  data: {
+  data?: {
     received: { x: unknown; y: number }[];
     due: { x: unknown; y: number }[];
   };
+  series?: {
+    name: string;
+    data: { x: unknown; y: number }[];
+  }[];
+  colors?: string[];
 };
 
 const Chart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
 });
 
-export function PaymentsOverviewChart({ data }: PropsType) {
+export function PaymentsOverviewChart({
+  data,
+  series,
+  colors = ["#5750F1", "#0ABEF9"],
+}: PropsType) {
   const isMobile = useIsMobile();
+  const chartSeries =
+    series ??
+    (data
+      ? [
+          {
+            name: "Received",
+            data: data.received,
+          },
+          {
+            name: "Due",
+            data: data.due,
+          },
+        ]
+      : []);
 
   const options: ApexOptions = {
     legend: {
       show: false,
     },
-    colors: ["#5750F1", "#0ABEF9"],
+    colors,
     chart: {
       height: 310,
       type: "area",
@@ -89,16 +112,7 @@ export function PaymentsOverviewChart({ data }: PropsType) {
     <div className="-ml-4 -mr-5 h-[310px]">
       <Chart
         options={options}
-        series={[
-          {
-            name: "Received",
-            data: data.received,
-          },
-          {
-            name: "Due",
-            data: data.due,
-          },
-        ]}
+        series={chartSeries}
         type="area"
         height={310}
       />
